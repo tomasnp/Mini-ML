@@ -1,74 +1,58 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2638
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fswiss\fcharset0 Helvetica-BoldOblique;\f2\fswiss\fcharset0 Helvetica-Bold;
-}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww27300\viewh15220\viewkind0
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+# Mini-ML Interpreter
 
-\f0\fs24 \cf0 \
+This project is carried out as part of the third year of functional programming at the University of Paris-Saclay in mathematics and computer science.
+The objective of the project is the construction of an interpreter for a fragment of Caml. The interpreter combines functional aspects and mutable data structures. The project consists of four files, namely mmllexer.mll, mmlparser.mly, typechecker.ml and interpreter.ml. The files must be completed to produce the final program, mmli, which will be a complete interpreter for Mini-ML. 
 
-\f1\i\b PROJET MINI-ML STEVAN BAKI\uc0\u262  ET THOMAS SINAPI
-\f0\i0\b0 \
-\
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
 
-\f2\b \cf0 \ul \ulc0 Organisation du travail:
-\f0\b0 \ulnone \
-\
-Nous avons choisi la deuxi\'e8me m\'e9thode de progression en travaillant dans un premier temps sur les fichiers lexer\'a0et\'a0parser pour l\'92analyse lexicale et syntaxique des fragments de codes. Nous avons donc travailler dans un second temps sur les fichiers typechecker et interpreter pour la v\'e9rification des types et l\'92interpr\'e9tation.\
-\
-De plus, nous avons eu un probl\'e8me de compilation et pour build sur la machine (Macbook) d\'92un des membres du bin\'f4me qui n\'92a pas pu \'eatre r\'e9gl\'e9 en s\'e9ance de TD. Nous avons donc travaill\'e9 ensemble en permanence sur une machine. L\'92avancement du projet a pu se faire en travaillant sur deux machines et en s\'92envoyant les morceaux de codes \'e0 faire compiler.\
-Nous nous sommes malheureusement mal organis\'e9s en d\'e9but de projet, ce qui nous \'e0 mit dans une situation o\'f9 nous avions manqu\'e9 de temps dans les derni\'e8res semaines puisque nous avions nos examens en m\'eame temps. \
-Nous aurions aim\'e9 aller plus loin.\
- \
-\
-Nous pouvons analyser, v\'e9rifier les types et interpr\'e9ter les fichiers : arith.mml ; compare.ml ; if.mml ; if.mml ; let.mml; fun.mml\
-\
-Malgr\'e9 de longues recherches, le fichier fact.mml nous donne une erreur et nous n\'92arrivons pas \'e0 comprendre pourquoi.\
-On a \'e9galement essay\'e9 d\'92impl\'e9menter program mais nous n\'92avons r\'e9ussi \'e0 avoir rien de concret. \
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
-\cf0 \
-\
-\
+# Syntax
 
-\f2\b \ul Fichiers : 
-\f0\b0 \ulnone \
-\
+The syntax of Mini-ML is defined by the following rules:
 
-\f1\i\b mml.ml :
-\f0\i0\b0 \
-\
-Types utilis\'e9s dans le programme, pour les repr\'e9sentations du programme global, des fonctions, des valeurs et expressions manipul\'e9es par le programme.\
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\tx14007\tx14358\tx15616\tx15721\tx16263\tx16470\pardirnatural\partightenfactor0
-\cf0 \
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+    <program> ::=  [<type_def>]* <expr> eof
 
-\f1\i\b \cf0 mmllexer.ml : 
-\f0\i0\b0 \
-\
-Analyseur lexical. \
-Le fichier identifie les diff\'e9rents mots-cl\'e9s et symboles \'e0 reconna\'eetre\
-\
+    <type_def> ::=  type ident = { [[mutable]? ident : <type> ;]+ }
 
-\f1\i\b mmlparseur.ml : 
-\f0\i0\b0 \
-\
-Analyseur syntaxique.\
-Liste des lex\'e8mes \'e0 reconna\'eetre (d\'e9finis dans mmllexer.ml) et des ordres de priorit\'e9s\
-D\'e9clarations des types, expressions, simples expressions, symboles unaires et binaires.\
-\
+    <type> ::=  int 
+            |   bool
+            |   unit
+            |   ident
+            |   <type> -> <type>
+            |   ( <type> )
 
-\f1\i\b typechercker.ml :\
-\
+    <expr> ::=  <s_expr>
+            |   <uop> <s_expr>
+            |   <expr> <bop> <expr>
+            |   <expr> <s_expr>
+            |   if <expr> then <expr>
+            |   if <expr> then <expr> else <expr>
+            |   fun ( ident : type ) -> <expr>
+            |   let ident [( ident : <type> )]* = <expr> in <expr>
+            |   let rec ident [( ident : <type> )]* : <type> = <expr> in <expr>
+            |   <s_expr> . ident <- <expr>
+            |   <expr> ; <expr>
 
-\f0\i0\b0 V\'e9rification des types pour les op\'e9rations binaires et unaires, les instructions( Let, Fun, If, App, Fix, Seq)\
-\
+    <s_expr> ::=  n 
+            |   true 
+            |   false
+            |   ()
+            |   ident
+            |   <s_expr> . ident
+            |   { [ident = <expr> ;]+ }
+            |   ( <expr> )
 
-\f1\i\b interpreter.ml : \
-\
+    <uop> ::=  -  |  not
+    <bop> ::=  +  |  -   |  *  |  /   |  mod
+            |  ==  |  !=  |  <  |  <=  |  &&   |  ||
 
-\f0\i0\b0 Interpretations des op\'e9rations binaires et unaires, les instructions( Let, Fun, If, App, Fix, Seq)\
+# Abstract Syntax
 
-\f1\i\b \
-}
+The following types define the abstract syntax of Mini-ML:
+
+    type prog = (string * typ) list * expr
+
+    and expr =
+    | Eint of int
+    | Ebool of bool
+    | Eunit
+    | Eident of string
+    | Ebinop of bop * expr * expr
